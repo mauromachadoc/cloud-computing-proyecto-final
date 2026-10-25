@@ -1,0 +1,7 @@
+name: iacbench-modularity
+description: Pulumi reusable ComponentResource example
+runtime:
+  name: python
+  options:
+    toolchain: pip
+    virtualenv: venv

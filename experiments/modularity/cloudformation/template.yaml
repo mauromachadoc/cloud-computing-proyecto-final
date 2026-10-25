@@ -1,0 +1,16 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Consumer of a reusable nested stack (child.yaml in S3)
+Parameters:
+  ChildTemplateUrl:
+    Type: String
+    Description: HTTPS URL of the uploaded child.yaml in an accessible S3 bucket
+Resources:
+  AssetBucket:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Ref ChildTemplateUrl
+      Parameters:
+        BucketName: !Sub 'iacbench-module-cfn-${AWS::AccountId}-${AWS::Region}'
+Outputs:
+  BucketName:
+    Value: !GetAtt AssetBucket.Outputs.BucketName

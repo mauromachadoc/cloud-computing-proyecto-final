@@ -1,0 +1,7 @@
+name: iacbench-failure
+description: Deliberate S3 bucket-policy failure for rollback study
+runtime:
+  name: python
+  options:
+    toolchain: pip
+    virtualenv: venv

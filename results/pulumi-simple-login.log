@@ -1,0 +1,2 @@
+Command: "C:\Program Files (x86)\Pulumi\pulumi.exe" login file:///C:/Users/Macha/Documents/iac-comparison/tiers/01-simple/pulumi/.pulumi-state --non-interactive
+Logged in to DESKTOP-CMTB37L as DESKTOP-CMTB37L\Macha (file:///C:/Users/Macha/Documents/iac-comparison/tiers/01-simple/pulumi/.pulumi-state)

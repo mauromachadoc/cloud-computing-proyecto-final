@@ -1,0 +1,7 @@
+name: iacbench-intensive
+description: iacbench - Intensive tier - Pulumi Python
+runtime:
+  name: python
+  options:
+    toolchain: pip
+    virtualenv: venv

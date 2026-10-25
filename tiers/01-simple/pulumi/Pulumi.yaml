@@ -1,0 +1,7 @@
+name: iacbench-simple
+description: iacbench - Simple tier (VPC + EC2 + S3) - Pulumi (Python)
+runtime:
+  name: python
+  options:
+    toolchain: pip
+    virtualenv: venv

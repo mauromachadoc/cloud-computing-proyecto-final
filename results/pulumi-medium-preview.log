@@ -1,0 +1,37 @@
+Command: "C:\Program Files (x86)\Pulumi\pulumi.exe" preview --non-interactive --stack dev
+Previewing update (dev):
+
+@ previewing update........
+ +  pulumi:pulumi:Stack iacbench-medium-dev create 
+@ previewing update.......
+ +  aws:ec2:Vpc vpc create 
+ +  aws:ecs:Cluster cluster create 
+ +  aws:iam:Role execution create 
+ +  aws:ec2:InternetGateway igw create 
+ +  aws:ec2:Subnet public-1 create 
+ +  aws:ec2:Subnet public-0 create 
+ +  aws:ec2:Subnet db-0 create 
+ +  aws:ec2:Subnet db-1 create 
+ +  aws:ec2:SecurityGroup alb create 
+ +  aws:lb:TargetGroup target create 
+ +  aws:ecs:TaskDefinition pong create 
+ +  aws:iam:RolePolicyAttachment execution create 
+ +  aws:ec2:RouteTable public create 
+ +  aws:rds:SubnetGroup db create 
+ +  aws:ec2:SecurityGroup task create 
+ +  aws:ec2:RouteTableAssociation public-0 create 
+ +  aws:ec2:RouteTableAssociation public-1 create 
+ +  aws:ec2:SecurityGroup db create 
+ +  aws:lb:LoadBalancer alb create 
+ +  aws:rds:Instance db create 
+ +  aws:lb:Listener http create 
+ +  aws:ecs:Service service create 
+@ previewing update....
+ +  pulumi:pulumi:Stack iacbench-medium-dev create 
+Outputs:
+    database_endpoint: [unknown]
+    site_url         : [unknown]
+
+Resources:
+    + 23 to create
+

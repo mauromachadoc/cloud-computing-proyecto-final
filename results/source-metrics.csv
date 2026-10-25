@@ -1,0 +1,13 @@
+tier,tool,loc
+simple,cloudformation,105
+simple,terraform,127
+simple,opentofu,127
+simple,pulumi,108
+medium,cloudformation,199
+medium,terraform,205
+medium,opentofu,205
+medium,pulumi,79
+intensive,cloudformation,342
+intensive,terraform,354
+intensive,opentofu,354
+intensive,pulumi,131

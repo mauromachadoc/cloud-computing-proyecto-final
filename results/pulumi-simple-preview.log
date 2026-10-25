@@ -1,0 +1,26 @@
+Command: "C:\Program Files (x86)\Pulumi\pulumi.exe" preview --non-interactive --stack dev
+Previewing update (dev):
+
+@ previewing update........
+ +  pulumi:pulumi:Stack iacbench-simple-dev create 
+@ previewing update.......
+ +  aws:ec2:Vpc vpc create 
+ +  aws:s3:BucketV2 assets create 
+ +  aws:ec2:InternetGateway igw create 
+ +  aws:ec2:Subnet public create 
+ +  aws:s3:BucketVersioningV2 assets create 
+ +  aws:s3:BucketServerSideEncryptionConfigurationV2 assets create 
+ +  aws:s3:BucketPublicAccessBlock assets create 
+ +  aws:ec2:SecurityGroup web create 
+ +  aws:ec2:RouteTable public create 
+ +  aws:ec2:RouteTableAssociation public create 
+ +  aws:ec2:Instance web create 
+@ previewing update....
+ +  pulumi:pulumi:Stack iacbench-simple-dev create 
+Outputs:
+    bucket_name: [unknown]
+    site_url   : [unknown]
+
+Resources:
+    + 12 to create
+

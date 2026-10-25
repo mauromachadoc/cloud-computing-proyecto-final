@@ -1,0 +1,1 @@
+Command: "C:\Program Files (x86)\Pulumi\pulumi.exe" config set aws:region us-east-1 --stack dev --non-interactive
