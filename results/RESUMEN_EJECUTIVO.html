@@ -26,11 +26,11 @@ section:last-child h3:last-of-type ~ p { font-size: 9pt; line-height: 1.23; marg
 </style><body><section><h1>Resumen Ejecutivo</h1>
 <h2>IaC en AWS: CloudFormation, Terraform, OpenTofu y Pulumi</h2>
 <p><strong>Proyecto Final de Cloud Computing · Universidad Católica del Uruguay</strong><br />
-<strong>Equipo:</strong> Joaquín Ballara, Facundo Dutra y Mauro Machado. <strong>Fecha:</strong> 25/10/2026.</p>
+<strong>Equipo:</strong> Joaquín Ballara, Facundo Dutra y Mauro Machado. <strong>Actualización:</strong> noviembre de 2026.</p>
 <h3>Objetivo Y Hallazgo Principal</h3>
-<p>Se compararon cuatro herramientas de infraestructura como código (IaC) al desplegar la misma aplicación Pong en AWS <code>us-east-1</code>, con dos niveles de complejidad. Se realizaron ocho ciclos reales: una ejecución por herramienta y nivel. <strong>Los ocho desplegaron correctamente, sirvieron Pong por HTTP y completaron su destrucción.</strong> En el nivel medio, el deploy varió entre 353,62 y 373,05 segundos. El hallazgo central del caso es que las esperas de aprovisionamiento y estabilización de AWS resultaron más determinantes que las diferencias observadas entre motores. No se identifica un ganador universal [9].</p>
+<p>Se comparan cuatro herramientas de infraestructura como código (IaC) al desplegar Pong en AWS <code>us-east-1</code>, con tres niveles de complejidad. Las ocho corridas simple/medio de octubre se amplían con cuatro ciclos intensivos completos y un intento fallido conservado. El nivel medio registró deploys de 353,62 a 373,05 s. En el segundo intento intensivo de CloudFormation, RDS necesitó 888,06 s y fue la última dependencia en terminar: las esperas de AWS son relevantes para interpretar el cronómetro. <strong>No se identifica un ganador universal</strong> [9].</p>
 <h3>Marco Teórico Y Comparativa</h3>
-<p>IaC expresa la infraestructura en archivos reproducibles y versionables. El modelo declarativo describe el estado deseado; un motor resuelve dependencias y solicita cambios mediante las API del proveedor. El plan o preview permite inspeccionar operaciones antes de ejecutarlas. El estado relaciona las declaraciones con los recursos existentes; su custodia es una responsabilidad operativa, no solo un detalle de almacenamiento [1–4, 6–7].</p>
+<p>IaC expresa la infraestructura en archivos reproducibles y versionables. El modelo declarativo describe el estado deseado; un motor resuelve dependencias y solicita cambios mediante las API del proveedor. El plan o preview permite inspeccionar operaciones antes de ejecutarlas. El estado relaciona las declaraciones con los recursos existentes; su custodia es una responsabilidad operativa, no solo un detalle de almacenamiento [1-4, 6-7].</p>
 <table>
 <thead>
 <tr>
@@ -64,11 +64,13 @@ section:last-child h3:last-of-type ~ p { font-size: 9pt; line-height: 1.23; marg
 </table>
 <p>Usar Python no convierte el despliegue en una secuencia manual de scripts: el motor Pulumi conserva la resolución de dependencias y el estado deseado. Asimismo, un preview sin cambios es una señal de estabilidad de la configuración, pero no equivale a una auditoría uniforme de drift entre herramientas.</p>
 <h3>Arquitectura Del Caso</h3>
-<p><strong>Simple:</strong> VPC, una subred pública, Internet Gateway, rutas, grupo de seguridad y EC2 <code>t3.micro</code> con Amazon Linux 2023 y nginx. Un bucket S3 privado, versionado y cifrado es independiente del sitio. Pong se descarga al arrancar desde un commit fijo GPL-3.0 [8–9].</p>
+<p><strong>Simple:</strong> VPC, una subred pública, Internet Gateway, rutas, grupo de seguridad y EC2 <code>t3.micro</code> con Amazon Linux 2023 y nginx. Un bucket S3 privado, versionado y cifrado es independiente del sitio. Pong se descarga al arrancar desde un commit fijo GPL-3.0 [8-9].</p>
 <p><strong>Medio:</strong> VPC en dos zonas de disponibilidad, dos subredes públicas para ALB y ECS Fargate, y dos privadas para datos. Una tarea de 0,25 vCPU/0,5 GiB recibe tráfico del ALB y utiliza IP pública para salir a Internet, sin NAT Gateway. PostgreSQL 16.15 corre en RDS <code>db.t3.micro</code> single-AZ. Fargate evita administrar servidores del contenedor [5].</p>
-<p><code>Internet → EC2/nginx/Pong</code> en simple; <code>Internet → ALB → ECS/Pong</code> en medio. <strong>RDS no es utilizado por Pong</strong>: incrementa la complejidad de IaC, no su funcionalidad. Dos zonas para las subredes no implican alta disponibilidad completa: hay una tarea y RDS single-AZ. El nivel intensivo quedó fuera de la ejecución autorizada [9].</p></section>
+<p><strong>Intensivo:</strong> seis subredes en dos AZ, NAT compartido, ALB y ASG de 2-4 EC2 privadas, RDS Multi-AZ, Redis con réplica, S3 privado, CloudFront, IAM y alarmas. El recorrido público es <code>CloudFront → ALB → EC2/Pong</code>; S3 es independiente del origen. Un único NAT limita la disponibilidad del egreso [9].</p>
+<p><strong>RDS y Redis no son consumidos por Pong</strong>: aumentan la complejidad de infraestructura, no su funcionalidad. «Intensivo» no significa una prueba de carga de usuarios; verificar HTTPS tampoco prueba failover ni autoescalado.</p></section>
 <section><h3>Método Y Resultados</h3>
 <p>El orquestador ejecutó secuencialmente <code>init → preview → deploy → preview sin cambios → verificación HTTP → destroy</code>. Midió tiempo de pared, líneas efectivas de código (LOC), recursos y huella del estado. HTTP exigió código 200 y el título de Pong antes de destruir; se cronometró por separado. Los proveedores y dependencias se instalaron previamente: init es una medición <strong>warm</strong>, no una instalación desde cero [9].</p>
+<p>Las ocho filas de octubre se conservan de los informes versionados: sus CSV y logs originales no estaban en este checkout. Las filas intensivas provienen del CSV nuevo. El primer intento de CloudFormation rechazó HTTPS por un defecto del verificador; se conserva como fallido y se excluye de esta tabla de éxitos. El reintento corrigió el verificador y sirvió Pong por HTTPS [9].</p>
 <table>
 <thead>
 <tr>
@@ -145,18 +147,50 @@ section:last-child h3:last-of-type ~ p { font-size: 9pt; line-height: 1.23; marg
 <td style="text-align: right;">586,40</td>
 <td style="text-align: right;">79</td>
 </tr>
+<tr>
+<td>Intensivo</td>
+<td>CloudFormation</td>
+<td style="text-align: right;">37,57</td>
+<td style="text-align: right;">954,84</td>
+<td style="text-align: right;">496,55</td>
+<td style="text-align: right;">342</td>
+</tr>
+<tr>
+<td>Intensivo</td>
+<td>Terraform</td>
+<td style="text-align: right;">8,58</td>
+<td style="text-align: right;">953,20</td>
+<td style="text-align: right;">409,01</td>
+<td style="text-align: right;">356</td>
+</tr>
+<tr>
+<td>Intensivo</td>
+<td>OpenTofu</td>
+<td style="text-align: right;">8,98</td>
+<td style="text-align: right;">952,36</td>
+<td style="text-align: right;">452,27</td>
+<td style="text-align: right;">356</td>
+</tr>
+<tr>
+<td>Intensivo</td>
+<td>Pulumi</td>
+<td style="text-align: right;">25,72</td>
+<td style="text-align: right;">908,19</td>
+<td style="text-align: right;">867,48</td>
+<td style="text-align: right;">131</td>
+</tr>
 </tbody>
 </table>
-<p><strong>Interpretación temporal.</strong> Terraform tuvo el menor deploy en ambos niveles; Pulumi eliminó antes el simple y OpenTofu el medio. No hay una única herramienta que lidere todas las operaciones. En medio, la diferencia de deploy entre extremos fue 19,43 s, apenas 5,49 % respecto del menor valor. El salto simple–medio multiplicó el deploy entre 5,84 y 7,88 veces, y destroy entre 8,24 y 13,43 veces: el costo temporal creció más que el inventario, porque cambió la naturaleza de los servicios [9].</p>
-<p>Los logs de Terraform, OpenTofu y Pulumi registran 321–332 s para crear RDS y 134–144 s para ALB. Son ramas parcialmente paralelas, no tiempos sumables. RDS fue una espera determinante de creación; ECS tardó 427–435 s en eliminarse. En Pulumi, el borrado de ALB y RDS comenzó después de finalizar ECS, lo que contribuyó a su mayor destroy medio. Esto explica parte del patrón sin atribuir toda la diferencia al motor; también influyen dependencias, proveedores y sondeo [9].</p>
-<p><strong>Código y estado.</strong> Pulumi fue más compacto en medio: 79 LOC frente a 205 en HCL, un 61,46 % menos. Su reducción desde 108 LOC del simple refleja el estilo y la compactación del código, no una modularidad demostrada. Los conteos de recursos tampoco son homogéneos: opciones integradas en un recurso pueden representarse por separado en otro proveedor.</p>
-<p>El estado medio midió 45.666 B en Terraform, 44.711 B en OpenTofu y 193.481 B en Pulumi. Se comparó un archivo HCL con todo un directorio de backend Pulumi; <strong>no son medidas equivalentes de eficiencia</strong>. CloudFormation registró 0 B locales porque AWS administra su estado. No se probaron pérdida de estado, colaboración ni recuperación [6–7, 9].</p></section>
+<p><strong>Interpretación temporal.</strong> En el histórico, Terraform tuvo el menor deploy simple/medio; Pulumi eliminó antes el simple y OpenTofu el medio. En intensivo, deploy varió entre 908,19 y 954,84 s, y destroy entre 409,01 y 867,48 s. Pulumi tuvo el menor deploy intensivo y el mayor destroy; Terraform tuvo el menor destroy. <strong>No hay un ganador en todas las operaciones.</strong> Una observación exitosa por combinación no permite estimar variabilidad ni generalizar el ranking [9].</p>
+<p>En el histórico medio, RDS necesitó 321-332 s; en el intensivo CloudFormation, 888,06 s. Son ramas parcialmente paralelas y sus tiempos no se suman. En medio, eliminar ECS tomó 427-435 s. Cambian los servicios y dependencias: no se aisló el overhead del motor ni corresponde atribuirle toda diferencia [9].</p>
+<p><strong>Código y estado.</strong> Pulumi usa 79 LOC frente a 205 de HCL en medio, y 131 frente a 356 en intensivo. La concisión depende del estilo y formato; no prueba modularidad ni facilidad de mantenimiento. Los recursos lógicos tampoco son unidades homogéneas entre proveedores.</p>
+<p>HCL mide un archivo de estado y Pulumi todo un directorio de backend: <strong>no son medidas equivalentes de eficiencia</strong>. CloudFormation registra 0 B locales porque AWS administra su estado. No se probaron pérdida de estado, colaboración ni recuperación [6-7, 9].</p></section>
 <section><h3>Conclusión Y Recomendación</h3>
-<p>Las cuatro herramientas resultaron viables para las dos arquitecturas. <strong>Terraform/OpenTofu</strong> son candidatos sólidos si el equipo prioriza HCL y planes explícitos: sus tiempos fueron cercanos y no justifican elegir uno únicamente por rendimiento. <strong>Pulumi</strong> es atractivo para un equipo afín a Python y produjo menos texto, aunque exige gestionar sus dependencias y considerar el destroy observado en pipelines efímeros. <strong>CloudFormation</strong> resulta coherente con una estrategia centrada en AWS y estado administrado, aceptando el procedimiento de change sets. Estas recomendaciones combinan resultados observados y capacidades documentadas, no ventajas operativas exhaustivamente probadas [1–4, 9].</p>
+<p>Las cuatro herramientas resultaron viables para las tres arquitecturas. <strong>Terraform/OpenTofu</strong> son candidatos sólidos si el equipo prioriza HCL y planes explícitos: sus tiempos fueron cercanos y no justifican elegir uno únicamente por rendimiento. <strong>Pulumi</strong> es atractivo para un equipo afín a Python y produjo menos texto, aunque exige gestionar sus dependencias y considerar el destroy observado en pipelines efímeros. <strong>CloudFormation</strong> resulta coherente con una estrategia centrada en AWS y estado administrado, aceptando el procedimiento de change sets. Estas recomendaciones combinan resultados observados y capacidades documentadas, no ventajas operativas exhaustivamente probadas [1-4, 9].</p>
 <p>La decisión debe priorizar conocimiento del equipo, claridad del código, operación del estado y limpieza, además del cronómetro. En este caso, <strong>el nivel medio tardó más en destruirse que en crearse con las cuatro herramientas</strong>. Por ello, un pipeline debe reservar tiempo para liberar servicios y comprobar remanentes antes de iniciar otra corrida.</p>
 <h3>Alcance, Seguridad Y Costos</h3>
-<p>Se dispone de una observación por combinación: es suficiente para interpretar este caso, pero no para estimar variabilidad ni generalizar un ranking. Los no-op no tuvieron igual cobertura de drift; los proveedores fueron AWS 5.100.0 en HCL y 6.83.4 en Pulumi. La imagen <code>nginx:stable-alpine</code> es mutable y la descarga de Pong/CDN introduce dependencias externas. HTTP no prueba una sesión interactiva ni disponibilidad sostenida. No se ejecutaron el nivel intensivo ni los experimentos de rollback, pérdida de estado y modularidad [9].</p>
-<p>La auditoría final devolvió inventarios vacíos dentro de su alcance. Los créditos reportados pasaron de 118,80 a 138,80 USD, consistentes con una recompensa RDS de 20 USD; no determinan el costo real por el posible retraso de facturación. Los 0,1506 USD del benchmark son una heurística, no una factura. Antes de ampliar el estudio corresponde revisar cargos, configurar presupuesto, fijar imágenes y repetir mediciones; el nivel intensivo requiere autorización separada [9].</p>
+<p>La muestra no permite estimar variabilidad ni generalizar un ranking. Los no-op no tuvieron igual cobertura de drift; los proveedores fueron AWS 5.100.0 en HCL y 6.83.4 en Pulumi. El SDK Pulumi intensivo fue 3.276.0, frente a 3.272.0 en octubre; las fechas y algunas versiones de servicio también difieren. La imagen ECS es mutable y Pong/CDN introduce dependencias externas. No se ejecutaron los experimentos de rollback, pérdida de estado y modularidad [9].</p>
+<p>El histórico de octubre reporta inventarios vacíos y créditos de 118,80 a 138,80 USD, consistentes con una recompensa RDS de 20 USD. Su costo heurístico fue 0,1506 USD: no es una factura ni describe el gasto intensivo. La extensión tiene su propia auditoría y estimación en <code>INTENSIVO.md</code> y <code>AUDITORIA_INTENSIVO.md</code>. Los créditos pueden actualizarse con retraso; no se usó su diferencia para inferir costos ni se cambió el plan de cuenta [9].</p>
 <h3>Referencias Bibliográficas</h3>
 <p>Fuentes web consultadas el 25 de octubre de 2026; documentación sin fecha de publicación indicada.</p>
 <p>[1] Amazon Web Services. <em>What is CloudFormation?</em> <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html">Guía del servicio</a>.</p>
@@ -167,5 +201,5 @@ section:last-child h3:last-of-type ~ p { font-size: 9pt; line-height: 1.23; marg
 <p>[6] HashiCorp. <em>State</em>. <a href="https://developer.hashicorp.com/terraform/language/state">Estado, almacenamiento y precauciones</a>.</p>
 <p>[7] Pulumi. <em>State &amp; backends</em>. <a href="https://www.pulumi.com/docs/iac/concepts/state-and-backends/">Backends, checkpoints y refresh</a>.</p>
 <p>[8] Bocaletto Luca. <em>Pong</em> [Código fuente, GPL-3.0]. <a href="https://github.com/bocaletto-luca/Pong/tree/58927a56aef0117aa290898d9b48d0f7ee0918b0">Commit 58927a56</a>.</p>
-<p>[9] Ballara, J., Dutra, F. y Machado, M. (2026). <em>IaC en la práctica: caso de estudio en AWS</em>. Evidencia primaria del proyecto: <a href="results.csv">mediciones CSV</a>, <a href="RESULTADOS_REALES.md">informe consolidado</a>, <code>benchmark/bench.py</code> y <code>results/logs/</code>.</p>
+<p>[9] Ballara, J., Dutra, F. y Machado, M. (2026). <em>IaC en la práctica: caso de estudio en AWS</em>. Evidencia del proyecto: <a href="intensive-results.csv">mediciones intensivas</a>, <a href="HISTORICO_SIMPLE_MEDIO.md">tabla histórica</a>, <a href="RESULTADOS_REALES.md">informe consolidado</a>, <code>benchmark/bench.py</code> y logs locales.</p>
 <p>[10] OpenTofu. <em>State and Plan Encryption</em>. <a href="https://opentofu.org/docs/language/state/encryption/">Cifrado nativo y precauciones</a>.</p></section></body></html>

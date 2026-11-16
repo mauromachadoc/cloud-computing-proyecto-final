@@ -1,5 +1,7 @@
 # Benchmark simple: evidencias y limites
 
+**Documento histórico de octubre de 2026.** Sus valores y referencias a líneas describen el CSV y los logs originales, que no estaban presentes en el checkout usado para ejecutar el intensivo en noviembre. El nuevo `results.csv` registra las corridas intensivas y no corresponde a esas referencias históricas. No se reconstruyeron los archivos ausentes. Ver [INTENSIVO.md](INTENSIVO.md) para la ampliación y [HISTORICO_SIMPLE_MEDIO.md](HISTORICO_SIMPLE_MEDIO.md) para la tabla histórica conservada.
+
 ## Alcance
 
 Analisis exclusivamente documental de `results.csv`, `logs/simple-*-run1.log`, `logs/simple-*-run1-http.json` y las 16 auditorias `logs/simple-*-remaining-*.log`, existentes en `results/`. No se ejecutaron AWS, despliegues, consultas HTTP ni cambios de infraestructura. No se inspeccionaron ni se reproducen estados, claves, secretos o identificadores de cuenta.

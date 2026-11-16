@@ -15,9 +15,9 @@ PYTHON = Path(r"C:\Users\Macha\AppData\Local\Programs\Python\Python312\python.ex
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("tier", choices=["simple", "medium"])
+    parser.add_argument("tier", choices=["simple", "medium", "intensive"])
     args = parser.parse_args()
-    tier_dir = {"simple": "01-simple", "medium": "02-medium"}[args.tier]
+    tier_dir = {"simple": "01-simple", "medium": "02-medium", "intensive": "03-intensive"}[args.tier]
     project = ROOT / "tiers" / tier_dir / "pulumi"
     results = ROOT / "results"
     assert project.is_dir() and results.is_dir()

@@ -21,7 +21,20 @@ OUT = Path(__file__).resolve().parent
 def main():
     source = (OUT / "RESUMEN_EJECUTIVO.md").read_text(encoding="utf-8")
     with (OUT / "results.csv").open(newline="", encoding="utf-8") as stream:
-        measurements = list(csv.DictReader(stream))
+        measurements = [row for row in csv.DictReader(stream) if row["ok"] == "True"]
+    historical = []
+    if not any(row["tier"] in ("simple", "medium") for row in measurements):
+        loc = {}
+        for line in (OUT / "HISTORICO_SIMPLE_MEDIO.md").read_text(encoding="utf-8").splitlines():
+            if line.startswith(("| simple |", "| medium |")):
+                cells = [part.strip() for part in line.strip("|").split("|")]
+                loc[(cells[0], cells[1])] = cells[3]
+        for line in (OUT / "RESULTADOS_REALES.md").read_text(encoding="utf-8").splitlines():
+            if line.startswith(("| simple |", "| medium |")):
+                cells = [part.strip() for part in line.strip("|").split("|")]
+                historical.append(dict(tier=cells[0], tool=cells[1], preview_s=cells[3],
+                                       deploy_s=cells[4], destroy_s=cells[6], loc=loc[(cells[0], cells[1])]))
+    measurements = historical + measurements
     expected_rows = []
     for row in measurements:
         expected_rows.append((row["tier"], row["tool"],
@@ -29,12 +42,12 @@ def main():
                                 for field in ("preview_s", "deploy_s", "destroy_s")], row["loc"]))
     actual_rows = []
     for line in source.splitlines():
-        if line.startswith(("| Simple |", "| Medio |")):
+        if line.startswith(("| Simple |", "| Medio |", "| Intensivo |")):
             cells = [part.strip() for part in line.strip("|").split("|")]
-            tier = "simple" if cells[0] == "Simple" else "medium"
+            tier = {"Simple": "simple", "Medio": "medium", "Intensivo": "intensive"}[cells[0]]
             actual_rows.append((tier, cells[1].casefold(), *cells[2:]))
     if actual_rows != expected_rows:
-        raise RuntimeError("Executive summary table differs from original CSV measurements")
+        raise RuntimeError("Executive summary table differs from CSV measurements or historical report")
     sections = source.split("<!-- pagebreak -->")
     if len(sections) != 3:
         raise RuntimeError("Expected three explicitly separated summary sections")
@@ -115,7 +128,7 @@ section:last-child h3:last-of-type ~ p { font-size: 9pt; line-height: 1.23; marg
                     if not all(re.fullmatch(r":?-+:?", part) for part in cells):
                         rows.append([Paragraph(inline(part), cell) for part in cells])
                     cursor += 1
-                fractions = [0.18, 0.30, 0.52] if len(rows[0]) == 3 else [0.10, 0.24, 0.17, 0.17, 0.17, 0.15]
+                fractions = [0.18, 0.30, 0.52] if len(rows[0]) == 3 else [0.13, 0.23, 0.16, 0.16, 0.16, 0.16]
                 table = Table(rows, colWidths=[width * fraction for fraction in fractions], repeatRows=1)
                 table.setStyle(TableStyle([
                     ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eaf0f3")),
@@ -152,7 +165,10 @@ section:last-child h3:last-of-type ~ p { font-size: 9pt; line-height: 1.23; marg
     evidence = dict(pages=len(reader.pages), page_format="A4", source="RESUMEN_EJECUTIVO.md",
                     html=html_path.name, renderer="ReportLab",
                     pdf=pdf_path.name, words_by_page=[len(re.findall(r"\S+", text)) for text in texts],
-                    expected_sections=expected, csv_rows_verified=len(actual_rows),
+                    expected_sections=expected, csv_rows_verified=len(measurements) - len(historical),
+                    total_measurement_rows_verified=len(actual_rows),
+                    historical_report_rows_verified=len(historical),
+                    new_csv_rows_verified=len(measurements) - len(historical),
                     external_pdf_links=sum(1 for page in reader.pages for annotation in page.get("/Annots", [])
                                            if annotation.get_object().get("/A", {}).get("/URI", "").startswith("https://")),
                     markdown_version=markdown.__version__)

@@ -1,6 +1,25 @@
 ## Interpretación De Resultados
 
+**Alcance histórico:** el bloque histórico corresponde a las ocho corridas simple/medio de octubre de 2026. Las referencias a CSV, logs y auditoría describen la evidencia de aquella sesión; esos archivos primarios no estaban presentes en este checkout. La ampliación de noviembre se analiza en [INTENSIVO.md](INTENSIVO.md), con sus propios datos y auditoría. La afirmación histórica de que el intensivo estaba pendiente queda reemplazada por esa ampliación.
+
 ### Lectura General
+
+**Ampliación intensiva de noviembre:** las cuatro herramientas completaron un
+ciclo válido, con un intento adicional de CloudFormation fallido por el antiguo
+verificador HTTP y excluido de las medianas. Deploy: CloudFormation 954,84 s,
+Terraform 953,20 s, OpenTofu 952,36 s y Pulumi 908,19 s. Destroy: 496,55 s,
+409,01 s, 452,27 s y 867,48 s, respectivamente. Pulumi tuvo el menor deploy
+observado, pero el mayor destroy; Terraform tuvo el menor destroy. Esto no
+establece un ranking reproducible: solo hay un éxito por combinación.
+
+En CloudFormation intensivo, RDS necesitó 888,06 s y fue la última dependencia
+en terminar. Las ramas de aprovisionamiento se solapan y no se suman. Aumentar
+el inventario tampoco implicó aumentar siempre destroy: las cuatro herramientas
+cambiaron de arquitectura respecto del nivel medio, que incluía ECS. No se aisló
+el overhead de los motores. Las fechas, el SDK Pulumi y algunas versiones de
+servicio difieren entre el histórico y la ampliación. Ver [INTENSIVO.md](INTENSIVO.md)
+para datos, ratios, límites y evidencia de limpieza; los párrafos siguientes
+conservan la interpretación histórica simple/medio.
 
 El caso de estudio demuestra que las cuatro implementaciones pudieron gestionar el ciclo completo de la aplicación en los niveles simple y medio: **8 de 8 corridas correctas**, sin cambios propuestos en el segundo preview, con HTTP 200 y el título esperado de Pong antes del borrado. La auditoría final no encontró remanentes en los inventarios consultados. Esto valida la viabilidad de las implementaciones probadas; no demuestra disponibilidad sostenida, funcionamiento interactivo del juego, recuperación ante fallos o comportamiento en producción.
 

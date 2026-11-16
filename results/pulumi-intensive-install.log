@@ -1,0 +1,99 @@
+Command: "C:\Program Files (x86)\Pulumi\pulumi.exe" install --non-interactive
+Installing dependencies...
+
+Creating virtual environment...
+Finished creating virtual environment
+Updating pip, setuptools, and wheel in virtual environment...
+Requirement already satisfied: pip in c:\users\macha\documents\gitclone\cloud-computing-proyecto-final\tiers\03-intensive\pulumi\venv\lib\site-packages (25.0.1)
+Collecting pip
+  Downloading pip-26.3-py3-none-any.whl.metadata (4.6 kB)
+Collecting setuptools
+  Using cached setuptools-84.2.1-py3-none-any.whl.metadata (6.6 kB)
+Collecting wheel
+  Using cached wheel-0.48.0-py3-none-any.whl.metadata (2.3 kB)
+Collecting packaging>=24.0 (from wheel)
+  Using cached packaging-26.3-py3-none-any.whl.metadata (3.5 kB)
+Downloading pip-26.3-py3-none-any.whl (2.0 MB)
+   ---------------------------------------- 2.0/2.0 MB 15.4 MB/s eta 0:00:00
+Using cached setuptools-84.2.1-py3-none-any.whl (876 kB)
+Using cached wheel-0.48.0-py3-none-any.whl (33 kB)
+Using cached packaging-26.3-py3-none-any.whl (129 kB)
+Installing collected packages: setuptools, pip, packaging, wheel
+  Attempting uninstall: pip
+    Found existing installation: pip 25.0.1
+    Uninstalling pip-25.0.1:
+      Successfully uninstalled pip-25.0.1
+Successfully installed packaging-26.3 pip-26.3 setuptools-84.2.1 wheel-0.48.0
+Finished updating
+Installing dependencies in virtual environment...
+Collecting pulumi<4.0,>=3.100 (from -r requirements.txt (line 1))
+  Downloading pulumi-3.276.0-py3-none-any.whl.metadata (4.0 kB)
+Collecting pulumi-aws<7.0,>=6.0 (from -r requirements.txt (line 2))
+  Using cached pulumi_aws-6.83.4-py3-none-any.whl.metadata (10 kB)
+Collecting debugpy~=1.8.7 (from pulumi<4.0,>=3.100->-r requirements.txt (line 1))
+  Using cached debugpy-1.8.22-cp312-cp312-win_amd64.whl.metadata (1.4 kB)
+Collecting dill~=0.4 (from pulumi<4.0,>=3.100->-r requirements.txt (line 1))
+  Using cached dill-0.4.1-py3-none-any.whl.metadata (10 kB)
+Collecting grpcio<2,>=1.68.1 (from pulumi<4.0,>=3.100->-r requirements.txt (line 1))
+  Downloading grpcio-1.85.1-cp312-cp312-win_amd64.whl.metadata (3.9 kB)
+Collecting opentelemetry-api>=1.20.0 (from pulumi<4.0,>=3.100->-r requirements.txt (line 1))
+  Downloading opentelemetry_api-1.45.2-py3-none-any.whl.metadata (1.4 kB)
+Collecting opentelemetry-exporter-otlp-proto-grpc>=1.20.0 (from pulumi<4.0,>=3.100->-r requirements.txt (line 1))
+  Downloading opentelemetry_exporter_otlp_proto_grpc-1.45.2-py3-none-any.whl.metadata (2.6 kB)
+Collecting opentelemetry-instrumentation-grpc>=0.41b0 (from pulumi<4.0,>=3.100->-r requirements.txt (line 1))
+  Downloading opentelemetry_instrumentation_grpc-0.66b2-py3-none-any.whl.metadata (1.9 kB)
+Collecting opentelemetry-sdk>=1.20.0 (from pulumi<4.0,>=3.100->-r requirements.txt (line 1))
+  Downloading opentelemetry_sdk-1.45.2-py3-none-any.whl.metadata (1.6 kB)
+Requirement already satisfied: packaging>=26.0 in .\venv\Lib\site-packages (from pulumi<4.0,>=3.100->-r requirements.txt (line 1)) (26.3)
+Collecting protobuf<7,>=3.20.3 (from pulumi<4.0,>=3.100->-r requirements.txt (line 1))
+  Using cached protobuf-6.33.6-cp310-abi3-win_amd64.whl.metadata (593 bytes)
+Collecting pyyaml~=6.0 (from pulumi<4.0,>=3.100->-r requirements.txt (line 1))
+  Using cached pyyaml-6.0.3-cp312-cp312-win_amd64.whl.metadata (2.4 kB)
+Collecting semver~=3.0 (from pulumi<4.0,>=3.100->-r requirements.txt (line 1))
+  Downloading semver-3.1.2-py3-none-any.whl.metadata (5.1 kB)
+Collecting typing-extensions<5,>=4.11 (from pulumi<4.0,>=3.100->-r requirements.txt (line 1))
+  Using cached typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting parver>=0.2.1 (from pulumi-aws<7.0,>=6.0->-r requirements.txt (line 2))
+  Using cached parver-1.0.1.post0-py3-none-any.whl.metadata (2.1 kB)
+Collecting googleapis-common-protos~=1.57 (from opentelemetry-exporter-otlp-proto-grpc>=1.20.0->pulumi<4.0,>=3.100->-r requirements.txt (line 1))
+  Using cached googleapis_common_protos-1.76.0-py3-none-any.whl.metadata (8.5 kB)
+Collecting opentelemetry-exporter-otlp-common==0.66b2 (from opentelemetry-exporter-otlp-proto-grpc>=1.20.0->pulumi<4.0,>=3.100->-r requirements.txt (line 1))
+  Downloading opentelemetry_exporter_otlp_common-0.66b2-py3-none-any.whl.metadata (1.9 kB)
+Collecting opentelemetry-exporter-otlp-proto-common==1.45.2 (from opentelemetry-exporter-otlp-proto-grpc>=1.20.0->pulumi<4.0,>=3.100->-r requirements.txt (line 1))
+  Downloading opentelemetry_exporter_otlp_proto_common-1.45.2-py3-none-any.whl.metadata (1.8 kB)
+Collecting opentelemetry-proto==1.45.2 (from opentelemetry-exporter-otlp-proto-grpc>=1.20.0->pulumi<4.0,>=3.100->-r requirements.txt (line 1))
+  Downloading opentelemetry_proto-1.45.2-py3-none-any.whl.metadata (2.3 kB)
+Collecting opentelemetry-semantic-conventions==0.66b2 (from opentelemetry-sdk>=1.20.0->pulumi<4.0,>=3.100->-r requirements.txt (line 1))
+  Downloading opentelemetry_semantic_conventions-0.66b2-py3-none-any.whl.metadata (2.4 kB)
+Collecting opentelemetry-instrumentation==0.66b2 (from opentelemetry-instrumentation-grpc>=0.41b0->pulumi<4.0,>=3.100->-r requirements.txt (line 1))
+  Downloading opentelemetry_instrumentation-0.66b2-py3-none-any.whl.metadata (7.2 kB)
+Collecting wrapt<3.0.0,>=1.0.0 (from opentelemetry-instrumentation-grpc>=0.41b0->pulumi<4.0,>=3.100->-r requirements.txt (line 1))
+  Downloading wrapt-2.5.2-cp312-cp312-win_amd64.whl.metadata (7.7 kB)
+Downloading pulumi-3.276.0-py3-none-any.whl (461 kB)
+Using cached pulumi_aws-6.83.4-py3-none-any.whl (10.6 MB)
+Using cached debugpy-1.8.22-cp312-cp312-win_amd64.whl (5.4 MB)
+Using cached dill-0.4.1-py3-none-any.whl (120 kB)
+Downloading grpcio-1.85.1-cp312-cp312-win_amd64.whl (5.6 MB)
+   ---------------------------------------- 5.6/5.6 MB 31.3 MB/s  0:00:00
+Using cached protobuf-6.33.6-cp310-abi3-win_amd64.whl (437 kB)
+Using cached pyyaml-6.0.3-cp312-cp312-win_amd64.whl (154 kB)
+Downloading semver-3.1.2-py3-none-any.whl (19 kB)
+Using cached typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Downloading opentelemetry_api-1.45.2-py3-none-any.whl (60 kB)
+Downloading opentelemetry_exporter_otlp_proto_grpc-1.45.2-py3-none-any.whl (19 kB)
+Downloading opentelemetry_exporter_otlp_common-0.66b2-py3-none-any.whl (12 kB)
+Downloading opentelemetry_exporter_otlp_proto_common-1.45.2-py3-none-any.whl (15 kB)
+Downloading opentelemetry_proto-1.45.2-py3-none-any.whl (72 kB)
+Using cached googleapis_common_protos-1.76.0-py3-none-any.whl (307 kB)
+Downloading opentelemetry_sdk-1.45.2-py3-none-any.whl (141 kB)
+Downloading opentelemetry_semantic_conventions-0.66b2-py3-none-any.whl (206 kB)
+Downloading opentelemetry_instrumentation_grpc-0.66b2-py3-none-any.whl (24 kB)
+Downloading opentelemetry_instrumentation-0.66b2-py3-none-any.whl (36 kB)
+Downloading wrapt-2.5.2-cp312-cp312-win_amd64.whl (106 kB)
+Using cached parver-1.0.1.post0-py3-none-any.whl (20 kB)
+Installing collected packages: wrapt, typing-extensions, semver, pyyaml, protobuf, parver, dill, debugpy, opentelemetry-proto, opentelemetry-api, grpcio, googleapis-common-protos, opentelemetry-semantic-conventions, opentelemetry-exporter-otlp-proto-common, opentelemetry-sdk, opentelemetry-instrumentation, opentelemetry-instrumentation-grpc, opentelemetry-exporter-otlp-common, opentelemetry-exporter-otlp-proto-grpc, pulumi, pulumi-aws
+
+Successfully installed debugpy-1.8.22 dill-0.4.1 googleapis-common-protos-1.76.0 grpcio-1.85.1 opentelemetry-api-1.45.2 opentelemetry-exporter-otlp-common-0.66b2 opentelemetry-exporter-otlp-proto-common-1.45.2 opentelemetry-exporter-otlp-proto-grpc-1.45.2 opentelemetry-instrumentation-0.66b2 opentelemetry-instrumentation-grpc-0.66b2 opentelemetry-proto-1.45.2 opentelemetry-sdk-1.45.2 opentelemetry-semantic-conventions-0.66b2 parver-1.0.1.post0 protobuf-6.33.6 pulumi-3.276.0 pulumi-aws-6.83.4 pyyaml-6.0.3 semver-3.1.2 typing-extensions-4.16.0 wrapt-2.5.2
+Finished installing dependencies
+Finished installing dependencies
+

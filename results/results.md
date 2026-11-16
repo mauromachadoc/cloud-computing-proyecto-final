@@ -1,5 +1,20 @@
 # Benchmark results
 
+_Generated 2026-11-16T00:03:37 - times are medians of successful runs, in seconds._
+
+| Tier | Tool | Runs ok/total | LOC | Resources | Preview (s) | Deploy (s) | No-op preview (s) | Destroy (s) | State | Est. cost/run (USD) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| intensive | cloudformation | 1/2 | 342 | 40 | 37.6 | 954.8 | 4.8 | 496.6 | AWS-managed (no local file) (0 B) | 0.168 |
+| intensive | terraform | 1/1 | 356 | 41 | 8.6 | 953.2 | 14.1 | 409.0 | local terraform.tfstate (86055 B) | 0.191 |
+| intensive | opentofu | 1/1 | 356 | 41 | 9.0 | 952.4 | 13.8 | 452.3 | local terraform.tfstate (84074 B) | 0.197 |
+| intensive | pulumi | 1/1 | 131 | 41 | 25.7 | 908.2 | 19.2 | 867.5 | local file backend (.pulumi-state/) (339802 B) | 0.249 |
+
+## Histórico simple/medio
+
+Las ocho corridas de octubre se conservan como informe histórico. Su CSV y logs originales no estaban presentes en este checkout; no se reconstruyeron ni mezclaron con las nuevas mediciones.
+
+### Tabla histórica de octubre de 2026
+
 _Generated 2026-10-25T04:12:43 - times are medians of successful runs, in seconds._
 
 | Tier | Tool | Runs ok/total | LOC | Resources | Preview (s) | Deploy (s) | No-op preview (s) | Destroy (s) | State | Est. cost/run (USD) |

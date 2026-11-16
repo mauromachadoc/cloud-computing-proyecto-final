@@ -1,4 +1,4 @@
-"""Run authorized simple/medium benchmarks with persistent execution logs."""
+"""Run benchmarks with persistent execution logs and cleanup checks."""
 from __future__ import annotations
 
 import argparse
@@ -19,9 +19,10 @@ LOGS = OUT / "logs"
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("phase", choices=("prepare", "simple", "medium", "audit"))
+    parser.add_argument("phase", choices=("prepare", "simple", "medium", "intensive", "audit", "audit-intensive"))
     parser.add_argument("--tool", choices=("cloudformation", "terraform", "opentofu", "pulumi"))
     parser.add_argument("--background", action="store_true")
+    parser.add_argument("--start-run", type=int, default=1)
     args = parser.parse_args()
     LOGS.mkdir(exist_ok=True)
     name = args.phase + ("-" + args.tool if args.tool else "")
@@ -29,6 +30,7 @@ def main():
         cmd = [sys.executable, "-u", str(Path(__file__).resolve()), args.phase]
         if args.tool:
             cmd += ["--tool", args.tool]
+        cmd += ["--start-run", str(args.start_run)]
         with (LOGS / f"session-{name}.log").open("a", encoding="utf-8") as stream:
             process = subprocess.Popen(cmd, cwd=ROOT, stdout=stream, stderr=subprocess.STDOUT,
                                        creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
@@ -81,7 +83,7 @@ def main():
         if identity["Account"] != "682036276612":
             raise RuntimeError("AWS account differs from the authorized account")
         aws("credits", "freetier", "get-account-plan-state", required=False)
-        if args.phase == "audit":
+        if args.phase in ("audit", "audit-intensive"):
             aws("credit-activities", "freetier", "list-account-activities", required=False)
         if args.phase == "prepare":
             for exe, version in (("terraform", "version"), ("tofu", "version"), ("pulumi", "version"), ("aws", "--version")):
@@ -94,10 +96,10 @@ def main():
                     run(f"validate-{tier}-{tool}", [binary, "validate", "-no-color"], folder)
                 template = ROOT / "tiers" / tier / "cloudformation" / "template.yaml"
                 run(f"lint-{tier}", ["cfn-lint", "--regions", "us-east-1", "--template", str(template)])
-        elif args.phase in ("simple", "medium"):
+        elif args.phase in ("simple", "medium", "intensive"):
             if not args.tool:
                 raise RuntimeError("A single --tool is required to check cleanup between deployments")
-            tier = "01-simple" if args.phase == "simple" else "02-medium"
+            tier = {"simple": "01-simple", "medium": "02-medium", "intensive": "03-intensive"}[args.phase]
             folder = ROOT / "tiers" / tier / args.tool
             if args.tool in ("terraform", "opentofu"):
                 state = folder / "terraform.tfstate"
@@ -110,7 +112,7 @@ def main():
                        for s in stacks["StackSummaries"]):
                     raise RuntimeError("Refusing deployment: stack already exists")
             result = run("benchmark", [sys.executable, "benchmark/bench.py", "run", "--tier", args.phase,
-                                       "--tools", args.tool, "--runs", "1", "--verify-http"], required=False)
+                                       "--tools", args.tool, "--runs", "1", "--start-run", str(args.start_run), "--verify-http"], required=False)
             csv_path = OUT / "results.csv"
             if csv_path.exists():
                 with csv_path.open(newline="", encoding="utf-8") as stream:
@@ -120,7 +122,7 @@ def main():
             if result.returncode or not payload.get("benchmark_row") or payload["benchmark_row"]["ok"] != "True":
                 benchmark_failed = True
         if args.phase != "prepare":
-            if args.phase == "audit":
+            if args.phase in ("audit", "audit-intensive"):
                 run("tests", [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-v"])
             checks = [
                 ("remaining-vpcs", ("ec2", "describe-vpcs", "--filters", "Name=tag:Name,Values=iacbench-*", "--query", "Vpcs")),
@@ -131,7 +133,7 @@ def main():
                 ("remaining-buckets", ("s3api", "list-buckets", "--query", "Buckets[?starts_with(Name, 'iacbench-')]")),
                 ("load-balancers", ("elbv2", "describe-load-balancers", "--query", "LoadBalancers[].{Name:LoadBalancerName,Vpc:VpcId,Arn:LoadBalancerArn}")),
             ]
-            if args.phase == "audit":
+            if args.phase in ("audit", "audit-intensive"):
                 checks += [
                     ("remaining-ecs-clusters", ("ecs", "list-clusters", "--query", "clusterArns[?contains(@, ':cluster/iacbench-')]")),
                     ("remaining-task-definitions", ("ecs", "list-task-definitions", "--family-prefix", "iacbench-medium", "--status", "ACTIVE", "--query", "taskDefinitionArns")),
@@ -142,10 +144,24 @@ def main():
                     ("account-target-groups", ("elbv2", "describe-target-groups", "--query", "TargetGroups[].{Name:TargetGroupName,Vpc:VpcId}")),
                     ("account-rds-secrets", ("secretsmanager", "list-secrets", "--filters", "Key=owning-service,Values=rds", "--query", "SecretList[].{Name:Name,DeletedDate:DeletedDate}")),
                 ]
+            if args.phase == "audit-intensive":
+                checks += [
+                    ("intensive-vpcs", ("ec2", "describe-vpcs", "--filters", "Name=cidr-block,Values=10.30.0.0/16", "--query", "Vpcs[].VpcId")),
+                    ("intensive-cache", ("elasticache", "describe-replication-groups", "--query", "ReplicationGroups[].{Id:ReplicationGroupId,Status:Status}")),
+                    ("intensive-cache-subnets", ("elasticache", "describe-cache-subnet-groups", "--query", "CacheSubnetGroups[].CacheSubnetGroupName")),
+                    ("intensive-cache-snapshots", ("elasticache", "describe-snapshots", "--query", "Snapshots[].{Name:SnapshotName,Status:SnapshotStatus}")),
+                    ("intensive-nat", ("ec2", "describe-nat-gateways", "--filter", "Name=state,Values=pending,available,deleting,failed", "--query", "NatGateways[].{Id:NatGatewayId,State:State}")),
+                    ("intensive-asg", ("autoscaling", "describe-auto-scaling-groups", "--query", "AutoScalingGroups[].AutoScalingGroupName")),
+                    ("intensive-launch-templates", ("ec2", "describe-launch-templates", "--query", "LaunchTemplates[].LaunchTemplateName")),
+                    ("intensive-cdn", ("cloudfront", "list-distributions", "--query", "DistributionList.Items[].{Id:Id,Domain:DomainName,Comment:Comment}")),
+                    ("intensive-alarms", ("cloudwatch", "describe-alarms", "--query", "MetricAlarms[].AlarmName")),
+                ]
             remaining = []
             for label, command in checks:
                 value = json.loads(aws(label, *command).stdout)
                 if value and label != "load-balancers" and not label.startswith("account-"):
+                    remaining.append(label)
+                if value and label == "load-balancers" and args.phase == "audit-intensive":
                     remaining.append(label)
             payload["cleanup_verified"] = not remaining
             if remaining:

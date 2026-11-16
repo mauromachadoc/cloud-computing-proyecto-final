@@ -1,5 +1,7 @@
 # Pulumi Preparation: Simple and Medium
 
+Historical preparation report for October. The intensive extension is recorded below; the statements in this section describe only that earlier preparation.
+
 Only `tiers/01-simple/pulumi` and `tiers/02-medium/pulumi` were prepared.
 No AWS resources were created. No `up` or `destroy` was executed.
 Intensive, Terraform, Tofu, CloudFormation, and `benchmark/bench.py` were not touched.
@@ -67,3 +69,11 @@ wrapt==2.5.1
 - `pulumi-simple-summary.json` and `pulumi-medium-summary.json`: commands, working directories, backend URIs, exit codes, durations, timeouts, and source-integrity result.
 - `pulumi-simple-*.log` and `pulumi-medium-*.log`: per-command output, including preview, install, dependency freeze, plugin inventory, and dependency checks.
 - `prepare_pulumi.py`: helper restricted to the two authorized tiers, with per-command timeouts and no deployment operations.
+
+## Intensive extension — November 2026
+
+The helper now also accepts `intensive`. Preparation completed without AWS resource creation: install, `pip check`, backend login, stack selection, region configuration, and preview all exited 0. Installation took 460.828 s; preview took 30.156 s and proposed 42 creations (including the Pulumi stack). The source integrity check passed.
+
+The intensive environment resolved Pulumi SDK 3.276.0 and Pulumi AWS 6.83.4 with Python 3.12.10; CLI version and full dependency freeze are in `pulumi-intensive-cli-version.log` and `pulumi-intensive-dependencies.log`. These dependencies differ from the historical SDK 3.272.0 and are a limitation when comparing dates. The subsequent deployment measurements are documented in [INTENSIVO.md](INTENSIVO.md), separately from this preparation.
+
+Evidence: `pulumi-intensive-summary.json` (local), `pulumi-intensive-*.log` (per-command output). Initial installation time is outside the benchmark; its measured setup reuses the prepared environment.

@@ -8,16 +8,33 @@ Proyecto Final Cloud Computing (UCU). Comparación de cuatro herramientas IaC ej
 |---|---|---|
 | 1 — Simple | VPC, EC2, S3; las cuatro herramientas | Código recibido, sin cambios de arquitectura |
 | 2 — Medio | VPC, ALB, ECS Fargate, RDS single-AZ | Código generado en las cuatro herramientas |
-| 3 — Intensivo | Tres capas multi-AZ, ALB, ASG EC2, RDS Multi-AZ, Redis/ElastiCache, S3, CloudFront, IAM, CloudWatch | Código generado en las cuatro herramientas |
+| 3 — Intensivo | Tres capas multi-AZ, ALB, ASG EC2, RDS Multi-AZ, Redis/ElastiCache, S3, CloudFront, IAM, CloudWatch | Ciclo real completado con las cuatro herramientas; limpieza auditada |
 | 4 — Experimentos | Fallo deliberado/rollback, pérdida controlada de estado local, modularidad, cifrado de estado OpenTofu | Código/guías generados en `experiments/` |
 
 **Actualización del 25 de octubre de 2026:** se desplegaron y destruyeron los niveles
 simple y medio con las cuatro herramientas en AWS `us-east-1`, con una corrida por
 combinación y comprobación HTTP de Pong. Las ocho corridas fueron correctas; los
 resultados y auditorías están en `results/RESULTADOS_REALES.md`, `results/results.csv`
-y `results/logs/`. La etapa intensiva quedó excluida por decisión del usuario y los
+y `results/logs/`. En aquella sesión la etapa intensiva quedó excluida y los
 experimentos de etapa 4 no se ejecutaron realmente. Una corrida por herramienta
 no constituye una comparación estadística robusta. Ver `VALIDACION.md`.
+
+**Ampliación intensiva de noviembre de 2026:** la solicitud posterior de ejecutar
+este nivel reemplaza su exclusión histórica. Las mediciones nuevas, los intentos
+fallidos y su interpretación se documentan en [results/INTENSIVO.md](results/INTENSIVO.md),
+con datos versionables en [results/intensive-results.csv](results/intensive-results.csv)
+y una [auditoría independiente de limpieza](results/AUDITORIA_INTENSIVO.md).
+El checkout no contenía el CSV ni los logs originales de octubre; se conservó su
+tabla en [results/HISTORICO_SIMPLE_MEDIO.md](results/HISTORICO_SIMPLE_MEDIO.md),
+sin reconstruir ni mezclar esos datos con el nuevo CSV intensivo. Los experimentos
+de etapa 4 siguen fuera de esta ejecución.
+
+Se completaron **cuatro ciclos intensivos con HTTPS 200 y destrucción correcta**.
+Hubo cinco intentos: el primero de CloudFormation falló por el verificador que no
+aceptaba HTTPS y se repitió después de corregirlo, conservando ambas evidencias.
+Deploy: CloudFormation 954,84 s, Terraform 953,20 s, OpenTofu 952,36 s y Pulumi
+908,19 s. Son observaciones individuales, no un ranking estadístico. La auditoría
+final devolvió inventarios vacíos dentro de su alcance.
 
 ## Arquitectura
 
@@ -81,18 +98,24 @@ Los comandos con `&&` suponen Bash o PowerShell 7; en Windows PowerShell 5.1 eje
 ```bash
 python benchmark/bench.py run --tier simple --runs 1 --profile cuenta-a
 python benchmark/bench.py run --tier medium --runs 1 --profile cuenta-a
-python benchmark/bench.py run --tier intensive --runs 1 --profile cuenta-a
+python benchmark/bench.py run --tier intensive --runs 1 --profile cuenta-a --verify-http
 # Cuando cada etapa funcione, aumentar --runs 3 o más.
 python benchmark/bench.py report
 ```
 
 También podés limitar a un proveedor con `--tools terraform` o `--tools cloudformation,pulumi`. Cada ciclo realiza preview → deploy → preview sin cambios → destroy. Registra resultados en `results/results.csv`, agregados en `results/results.md`, y logs por corrida en `results/logs/`. **No ejecuta cuatro despliegues simultáneamente.** Si fallan despliegue o limpieza, interrumpir las próximas corridas y verificar en la consola de AWS que no quedaron recursos cobrando. El script intenta borrar los recursos creados, pero la limpieza no está garantizada en todos los fallos.
 
-La opción `--verify-http` comprueba HTTP 200 y el título de Pong antes de destruir,
+La opción `--verify-http` comprueba HTTP 200 y el título de Pong por HTTP o HTTPS antes de destruir,
 con reintentos hasta cinco minutos. Su resultado y duración se guardan en
 `results/logs/<tier>-<tool>-run<N>-http.json`, separados del cronómetro de deploy.
 Si falla la comprobación, la corrida se marca fallida y se intenta limpiar.
 No constituye una prueba interactiva del juego ni verifica RDS, que Pong no utiliza.
+
+Para conservar los logs de un intento anterior al repetir una herramienta, usar
+un número nuevo, por ejemplo `--start-run 2 --runs 1`. La inicialización se mide
+en la primera corrida solicitada, aunque su número sea mayor que uno. Confirmar
+la limpieza antes de repetir; los intentos fallidos se conservan en el CSV y no
+entran en las medianas de éxito.
 
 ### Etapa 4
 
@@ -122,6 +145,12 @@ No se generaron las diapositivas de presentación ni el vídeo de respaldo. Se m
 
 `python results/summarize_aws.py` incorpora la interpretación de
 `results/INTERPRETACION.md` al regenerar el informe, sin llamar a AWS.
-`results/render_summary.py` genera HTML/PDF desde el resumen, verifica las ocho
-filas contra el CSV y comprueba las tres páginas. Requiere las dependencias de
+`python results/summarize_intensive.py` genera el informe intensivo, su CSV sin
+identificador de cuenta y el resumen de auditoría, después de comprobar la limpieza.
+Luego `python results/summarize_aws.py` incorpora esa ampliación al consolidado.
+Los logs y auditorías JSON completos se conservan localmente según `.gitignore`.
+
+`results/render_summary.py` genera HTML/PDF desde el resumen, verifica las filas
+nuevas contra el CSV y las históricas contra los informes conservados, y comprueba
+las tres páginas. Requiere las dependencias de
 `results/document-requirements.txt` y fuentes Segoe UI/Consolas de Windows.

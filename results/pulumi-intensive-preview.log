@@ -1,0 +1,61 @@
+Command: "C:\Program Files (x86)\Pulumi\pulumi.exe" preview --non-interactive --stack dev
+Previewing update (dev):
+@ previewing update.....
+
+@ previewing update...................
+ +  pulumi:pulumi:Stack iacbench-intensive-dev create 
+@ previewing update...........
+ +  aws:ec2:Vpc vpc create 
+ +  aws:ec2:Eip nat create 
+ +  aws:iam:Role instance create 
+ +  aws:s3:BucketV2 assets create 
+ +  aws:ec2:Subnet public-0 create 
+ +  aws:ec2:InternetGateway igw create 
+ +  aws:ec2:Subnet public-1 create 
+ +  aws:ec2:Subnet app-0 create 
+ +  aws:ec2:Subnet app-1 create 
+ +  aws:ec2:Subnet data-0 create 
+ +  aws:ec2:Subnet data-1 create 
+ +  aws:lb:TargetGroup target create 
+ +  aws:ec2:SecurityGroup alb create 
+ +  aws:s3:BucketVersioningV2 assets create 
+ +  aws:s3:BucketServerSideEncryptionConfigurationV2 assets create 
+ +  aws:s3:BucketPublicAccessBlock assets create 
+ +  aws:iam:RolePolicyAttachment ssm create 
+ +  aws:iam:InstanceProfile instance create 
+@ previewing update....
+ +  aws:ec2:NatGateway nat create 
+ +  aws:ec2:RouteTable public create 
+ +  aws:elasticache:SubnetGroup cache create 
+ +  aws:rds:SubnetGroup db create 
+ +  aws:ec2:SecurityGroup app create 
+ +  aws:ec2:RouteTable app create 
+ +  aws:ec2:RouteTableAssociation public-0 create 
+ +  aws:ec2:RouteTableAssociation public-1 create 
+ +  aws:ec2:RouteTableAssociation app-1 create 
+ +  aws:ec2:SecurityGroup db create 
+ +  aws:lb:LoadBalancer alb create 
+ +  aws:ec2:LaunchTemplate app create 
+ +  aws:ec2:RouteTableAssociation app-0 create 
+ +  aws:ec2:SecurityGroup cache create 
+ +  aws:rds:Instance db create 
+ +  aws:lb:Listener http create 
+ +  aws:cloudfront:Distribution cdn create 
+ +  aws:elasticache:ReplicationGroup redis create 
+ +  aws:autoscaling:Group app create 
+ +  aws:autoscaling:Policy up create 
+ +  aws:autoscaling:Policy down create 
+ +  aws:cloudwatch:MetricAlarm high create 
+ +  aws:cloudwatch:MetricAlarm low create 
+@ previewing update....
+ +  pulumi:pulumi:Stack iacbench-intensive-dev create 
+Outputs:
+    alb_url          : [unknown]
+    bucket_name      : [unknown]
+    database_endpoint: [unknown]
+    redis_endpoint   : [unknown]
+    site_url         : [unknown]
+
+Resources:
+    + 42 to create
+

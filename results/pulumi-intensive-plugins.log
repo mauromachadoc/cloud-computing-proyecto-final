@@ -1,0 +1,11 @@
+Command: "C:\Program Files (x86)\Pulumi\pulumi.exe" plugin ls --json
+[
+  {
+    "name": "aws",
+    "kind": "resource",
+    "version": "6.83.4",
+    "size": 794468296,
+    "installTime": "2026-10-25T05:59:12.477Z",
+    "lastUsedTime": "2026-11-16T01:01:13.175Z"
+  }
+]

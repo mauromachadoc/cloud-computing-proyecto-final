@@ -1,4 +1,41 @@
-# Estado de validación — 25 de octubre de 2026
+# Estado de validación — noviembre de 2026
+
+## Ampliación intensiva: 16 de noviembre de 2026 UTC
+
+Las cuatro herramientas completaron preview, deploy, no-op, HTTPS 200 con el
+título de Pong y destroy del nivel intensivo. Se registraron cinco intentos:
+cuatro correctos y uno fallido de CloudFormation por el verificador HTTP anterior.
+Ese intento se conserva; el reintento con HTTPS corregido completó el ciclo.
+
+| Herramienta | Deploy (s) | Destroy (s) | Recursos |
+|---|---:|---:|---:|
+| CloudFormation | 954,84 | 496,55 | 40 |
+| Terraform | 953,20 | 409,01 | 41 |
+| OpenTofu | 952,36 | 452,27 | 41 |
+| Pulumi | 908,19 | 867,48 | 41 |
+
+Terraform/OpenTofu intensivos pasaron init/validate tras corregir el bloque
+anidado de CloudFront. Pulumi pasó install, pip check y preview antes de medir.
+Se agregó soporte HTTPS y numeración de reintentos con pruebas de regresión.
+Las pruebas finales ejecutaron 12 casos: 11 correctos y uno omitido porque el
+chequeo de paquete sin estado no aplica al workspace inicializado.
+
+La auditoría independiente terminó `completed`, `cleanup_verified=true`:
+inventarios vacíos de recursos, incluidos NAT, CloudFront, ASG, launch templates,
+ElastiCache y snapshots, además de los servicios ya auditados en niveles previos.
+No se cambió el plan de cuenta. No se determinó el costo facturado.
+
+Evidencias versionables: [INTENSIVO.md](results/INTENSIVO.md),
+[intensive-results.csv](results/intensive-results.csv) y
+[AUDITORIA_INTENSIVO.md](results/AUDITORIA_INTENSIVO.md).
+El CSV original nuevo y los logs/JSON completos se conservan localmente según
+`.gitignore`. Los originales de octubre no estaban en este checkout; su tabla
+se conservó como histórico sin reconstruir datos primarios.
+
+## Historial anterior: octubre de 2026
+
+Lo siguiente describe validaciones y pendientes de aquella fecha. La ampliación
+anterior reemplaza sus afirmaciones de que el intensivo no se había ejecutado.
 
 ## Actualización: Ejecuciones Reales
 

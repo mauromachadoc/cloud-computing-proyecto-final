@@ -8,6 +8,6 @@ medium,terraform,205
 medium,opentofu,205
 medium,pulumi,79
 intensive,cloudformation,342
-intensive,terraform,354
-intensive,opentofu,354
+intensive,terraform,356
+intensive,opentofu,356
 intensive,pulumi,131

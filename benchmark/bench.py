@@ -299,7 +299,7 @@ def verify_http(ctx: Ctx) -> None:
         url = capture(ctx, [binary, "output", "-raw", "site_url"]).strip()
     start = time.perf_counter()
     evidence = {"url": url, "ok": False, "error": "No site URL returned"}
-    while url.startswith("http://") and time.perf_counter() - start < 300:
+    while url.startswith(("http://", "https://")) and time.perf_counter() - start < 300:
         try:
             with urlopen(url, timeout=10) as response:
                 body = response.read(1024 * 1024).decode("utf-8", errors="replace")
@@ -410,7 +410,12 @@ def report() -> None:
                 f"{med(col('preview_s'))} | {med(col('deploy_s'))} | {med(col('noop_preview_s'))} | "
                 f"{med(col('destroy_s'))} | {last['state_kind']} ({last['state_bytes']} B) | {cost:.3f} |"
             )
-    MD_PATH.write_text("\n".join(lines) + "\n")
+    historical = RESULTS_DIR / "HISTORICO_SIMPLE_MEDIO.md"
+    if historical.exists() and not any(r["tier"] in ("simple", "medium") for r in rows):
+        lines += ["", "## Histórico simple/medio", "",
+                  "Las ocho corridas de octubre se conservan como informe histórico. Su CSV y logs originales no estaban presentes en este checkout; no se reconstruyeron ni mezclaron con las nuevas mediciones.", "",
+                  historical.read_text(encoding="utf-8").replace("# Benchmark results", "### Tabla histórica de octubre de 2026", 1).rstrip()]
+    MD_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("\n".join(lines))
     print(f"\nWritten to {MD_PATH}")
 
@@ -424,6 +429,7 @@ def main() -> None:
     rn.add_argument("--tier", required=True, choices=list(TIER_DIRS))
     rn.add_argument("--tools", default=",".join(TOOLS), help="comma-separated subset")
     rn.add_argument("--runs", type=int, default=3)
+    rn.add_argument("--start-run", type=int, default=1, help="first run number; use a new number to preserve retry logs")
     rn.add_argument("--profile", help="AWS CLI profile (one per team member account)")
     rn.add_argument("--dry-run", action="store_true", help="print commands only")
     rn.add_argument("--verify-http", action="store_true", help="verify Pong before destroy; timed separately")
@@ -443,10 +449,10 @@ def main() -> None:
     print(f"Tier '{args.tier}' - rough live cost ~${est:.2f}/h while deployed (estimate, verify it).")
     all_rows: list[dict] = []
     for tool in tools:
-        for n in range(1, args.runs + 1):
-            print(f"\n=== {args.tier} / {tool} / run {n} of {args.runs} ===")
+        for n in range(args.start_run, args.start_run + args.runs):
+            print(f"\n=== {args.tier} / {tool} / run {n} ({args.runs} cycles requested) ===")
             # init/setup is timed only on the first run of each tool
-            row = run_cycle(args.tier, tool, n, args.profile, args.dry_run, skip_setup=(n > 1),
+            row = run_cycle(args.tier, tool, n, args.profile, args.dry_run, skip_setup=(n > args.start_run),
                             check_http=args.verify_http)
             all_rows.append(row)
             if not args.dry_run:

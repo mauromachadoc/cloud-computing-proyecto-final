@@ -323,6 +323,8 @@ resource "aws_cloudfront_distribution" "cdn" {
       cookies { forward = "none" }
     }
   }
-  restrictions { geo_restriction { restriction_type = "none" } }
+  restrictions {
+    geo_restriction { restriction_type = "none" }
+  }
   viewer_certificate { cloudfront_default_certificate = true }
 }

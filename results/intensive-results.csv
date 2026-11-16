@@ -1,0 +1,6 @@
+timestamp,tier,tool,run,ok,failed_step,init_s,preview_s,deploy_s,noop_preview_s,destroy_s,loc,resources,state_kind,state_bytes,est_cost_usd
+2026-11-16T00:49:00+00:00,intensive,cloudformation,1,False,http_verification,4.09,37.47,955.25,4.32,,342,40,AWS-managed (no local file),0,0.1333
+2026-11-16T01:14:21+00:00,intensive,cloudformation,2,True,,3.45,37.57,954.84,4.84,496.55,342,40,AWS-managed (no local file),0,0.2023
+2026-11-16T01:40:03+00:00,intensive,terraform,1,True,,5.33,8.58,953.2,14.07,409.01,356,41,local terraform.tfstate,86055,0.1911
+2026-11-16T02:04:41+00:00,intensive,opentofu,1,True,,3.66,8.98,952.36,13.85,452.27,356,41,local terraform.tfstate,84074,0.197
+2026-11-16T02:29:33+00:00,intensive,pulumi,1,True,,30.49,25.72,908.19,19.17,867.48,131,41,local file backend (.pulumi-state/),339802,0.2493

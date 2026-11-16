@@ -1,4 +1,4 @@
-"""Summarize the eight authorized benchmark cycles after the final audit."""
+"""Summarize historical simple/medium cycles and the intensive extension."""
 import csv
 from datetime import datetime, timezone
 import json
@@ -9,7 +9,30 @@ OUT = Path(__file__).resolve().parent
 
 def main():
     with (OUT / "results.csv").open(newline="", encoding="utf-8") as stream:
-        rows = list(csv.DictReader(stream))
+        all_rows = list(csv.DictReader(stream))
+    rows = [row for row in all_rows if row["tier"] in ("simple", "medium")]
+    intensive = [row for row in all_rows if row["tier"] == "intensive"]
+    if intensive:
+        intensive_audit = json.loads((OUT / "session-audit-intensive.json").read_text(encoding="utf-8"))
+        if intensive_audit["status"] != "completed" or not intensive_audit.get("cleanup_verified"):
+            raise RuntimeError("Intensive cleanup audit must complete before summarizing")
+    if intensive and not rows:
+        # A fresh checkout omits historical CSV/logs via .gitignore. Preserve
+        # the checked-in report rather than inventing primary measurements.
+        path = OUT / "RESULTADOS_REALES.md"
+        source = path.read_text(encoding="utf-8")
+        marker = "<!-- intensive-update -->"
+        source = source.split(marker)[0].rstrip()
+        notice = "**Actualización intensiva:** ver la ampliación al final de este documento. El bloque histórico describe las ocho corridas de octubre; su CSV y auditorías originales no estaban presentes en este checkout.\n\n"
+        if notice not in source:
+            source = source.replace("# Resultados reales en AWS\n\n", "# Resultados reales en AWS\n\n" + notice, 1)
+        path.write_text(source + "\n\n" + marker + "\n\n" + (OUT / "INTENSIVO.md").read_text(encoding="utf-8"), encoding="utf-8")
+        payload = dict(generated=datetime.now(timezone.utc).isoformat(), rows=all_rows,
+                       intensive_executed=True, intensive_audit_status=intensive_audit["status"],
+                       historical_primary_evidence_available=False)
+        (OUT / "aws-summary.json").write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        print("Historical report preserved; intensive measurements and audit incorporated")
+        return
     expected = {(tier, tool) for tier in ("simple", "medium")
                 for tool in ("cloudformation", "terraform", "opentofu", "pulumi")}
     if len(rows) != 8 or {(r["tier"], r["tool"]) for r in rows} != expected:
@@ -38,7 +61,7 @@ def main():
              "## Alcance", "",
              "Ocho ciclos reales secuenciales en us-east-1: una repeticion por herramienta en simple y medium.",
              "Cada ciclo completo preview, deploy, preview sin cambios, comprobacion HTTP de Pong y destroy.",
-             "La etapa intensive quedo expresamente excluida. No se ejecutaron experimentos destructivos de etapa 4.", "",
+             ("El nivel intensivo se ejecutó posteriormente y se documenta en la sección Intensivo. " if intensive else "La etapa intensive no se ejecutó. ") + "No se ejecutaron experimentos destructivos de etapa 4.", "",
              "## Tiempos", "", "Segundos medidos por el orquestador. La comprobacion HTTP se cronometra por separado.", "",
              "| Nivel | Herramienta | Init | Preview | Deploy | No-op | Destroy | Recursos | HTTP |",
              "|---|---|---|---|---|---|---|---|---|"]
@@ -67,6 +90,7 @@ def main():
               "- Pulumi configura explicitamente us-east-1; ECS espera la politica IAM adjunta en HCL/Pulumi.",
               "- Se agrego --verify-http: exige HTTP 200 y el titulo exacto de Pong; ante fallo intenta destruir el despliegue.",
               "- Las pruebas excluyen dependencias generadas. El chequeo de paquete sin estado se omite en un workspace inicializado.", "",
+              *((OUT / "INTENSIVO.md").read_text(encoding="utf-8").splitlines() if intensive else []), "",
               *(OUT / "INTERPRETACION.md").read_text(encoding="utf-8").splitlines(), "",
               "## Evidencias", "",
               "- results.csv: mediciones reales originales; results.md: tabla generada por bench.py report.",
@@ -77,9 +101,10 @@ def main():
               "- logs/audit-tests.log: pruebas finales. Las lineas FAILED impresas por los mocks de HTTP son esperadas; consultar el resumen unittest.", "",
               "Los logs contienen cuenta, ARN y endpoints. No publicar estados, planes o backups; revisar tambien metadatos antes de compartir logs.", ""]
     (OUT / "RESULTADOS_REALES.md").write_text("\n".join(lines), encoding="utf-8")
-    payload = dict(generated=datetime.now(timezone.utc).isoformat(), rows=rows, http=http,
+    payload = dict(generated=datetime.now(timezone.utc).isoformat(), rows=all_rows, http=http,
                    initial_credits_usd=initial_credit, final_credits_usd=final_credit,
-                   intensive_executed=False, audit_status=audit["status"])
+                   intensive_executed=bool(intensive), audit_status=audit["status"],
+                   intensive_audit_status=intensive_audit["status"] if intensive else None)
     (OUT / "aws-summary.json").write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     print(f"8/8 cycles and HTTP checks passed. Credits: {initial_credit} -> {final_credit} USD.")
     print("Written results/RESULTADOS_REALES.md and results/aws-summary.json")
